@@ -822,9 +822,10 @@ class SwinIR(nn.Module):
             x = self.upsample(x)
         elif self.upsampler == 'nearest+conv':
             # for real-world SR
-            x = self.conv_first(x)
-            x = self.conv_after_body(self.forward_features(x)) + x
-            x = self.conv_before_upsample(x)
+            with torch.no_grad():
+                x = self.conv_first(x)
+                x = self.conv_after_body(self.forward_features(x)) + x
+                x = self.conv_before_upsample(x)
             x = self.lrelu(self.conv_up1(torch.nn.functional.interpolate(x, scale_factor=2, mode='nearest')))
             x = self.lrelu(self.conv_up2(torch.nn.functional.interpolate(x, scale_factor=2, mode='nearest')))
             x = self.conv_last(self.lrelu(self.conv_hr(x)))
